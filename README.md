@@ -1,2 +1,4 @@
-# homework_SecondCourse
-Homework for Second Course
+# Kazan Federal University Programming Course
+
+# Homework
+Homework for Kazan Federal University Programming Course (Second Course)
