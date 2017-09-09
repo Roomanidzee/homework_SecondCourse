@@ -1,0 +1,39 @@
+.table{
+    display: block;
+    width: 100%;
+}
+
+.table_row{
+    clear: both;
+}
+
+.table_head{
+    background-color: #DDD;
+}
+
+.table_cell, .table_head{
+    border: 1px solid #999999;
+    float: left;
+    height: 17px;
+    overflow: hidden;
+    padding: 3px 1.8%;
+    width: 20%;
+    text-align: center;
+}
+
+.table:after{
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+}
+
+div.table_cell:nth-child(2n), div.table_head:nth-child(2n){
+    color: red;
+}
+
+div.table_cell:nth-child(2n+1), div.table_head:nth-child(2n+1){
+    color: blue;
+}

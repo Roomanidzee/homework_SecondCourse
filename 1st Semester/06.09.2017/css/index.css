@@ -1,0 +1,11 @@
+.meeting{
+    color: #666;
+    background-color: #ddd;
+    text-align: center;
+    font-size: 30px;
+}
+
+img.center{
+    display: block;
+    margin: 0 auto;
+}

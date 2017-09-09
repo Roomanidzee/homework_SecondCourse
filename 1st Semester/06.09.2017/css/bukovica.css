@@ -1,0 +1,12 @@
+p{
+    clear: left;
+}
+
+p::first-letter{
+    font-size: 3em;
+    padding: 3px;
+    margin-right: 5px;
+    color: #e7685d;
+    float: left;
+    line-height: 0.33em;
+}
