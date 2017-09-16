@@ -1,0 +1,1 @@
+mvn archetype:generate -DgroupId=com.romanidze -DartifactId=Test -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -Dversion=1.0
