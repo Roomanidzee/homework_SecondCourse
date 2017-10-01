@@ -1,0 +1,181 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<html>
+
+<head>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href = "<c:url value = "/css/materialize.min.css"/>"  media="screen,projection"/>
+    <link rel="stylesheet" href = "<c:url value = "/css/entry_style.css"/>"  media="screen,projection"/>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Страница входа</title>
+
+</head>
+
+<body>
+
+   <nav class = "nav-color">
+
+      <div class = "nav-wrapper">
+
+          <a href = "#" class = "brand-logo left">*здесь должен быть логотип*</a>
+
+          <ul id = "nav-mobile" class = "right hide-on-med-and-down">
+
+              <li><a href = "${pageContext.request.contextPath}/index">Главная страница</a></li>
+              <li><a href = "#">Каталог товаров</a></li>
+
+          </ul>
+
+      </div>
+
+   </nav>
+
+   <div class = "forms">
+
+       <h5 class = "black-text text-lighten-3 center-align">Зарегистрируйтесь, чтобы войти в личный кабинет: </h5>
+       <br/>
+
+       <c:if test='${not empty message}'>
+           <h3 class = "red-text text-lighten-3 center-align">${message}</h3>
+       </c:if>
+
+       <div class = "row">
+
+           <form class = "col s12 m8 offset-m2 l6 offset-l3" action="profile" method="POST">
+
+               <div class="row">
+
+                   <div class="col s12 m8 offset-m2 l9 offset-l2">
+
+                       <div class = "input-field inline col s8">
+                           <i class="material-icons prefix">email</i>
+                           <input id="email" type="text" class="validate" name = "email">
+                           <label for="email"  class = "active">Email: </label>
+                       </div>
+
+                   </div>
+
+               </div>
+
+               <div class = "row">
+
+                   <div class="col s12 m8 offset-m2 l9 offset-l2">
+
+                       <div class = "input-field inline col s8">
+                           <i class="material-icons prefix">lock_outline</i>
+                           <input id = "password" type = "password" class = "validate valign-wrapper">
+                           <label for = "password" class = "active">Пароль: </label>
+                       </div>
+
+                   </div>
+
+               </div>
+
+               <div class = "row">
+
+                   <div class="col s12 m8 offset-m2 l9 offset-l2">
+
+                       <div class = "input-field inline col s8">
+                           <i class="material-icons prefix">lock_outline</i>
+                           <input id = "password_repeat" type = "password" class = "validate valign-wrapper">
+                           <label for = "password_repeat" class = "active">Повторите пароль: </label>
+
+                       </div>
+
+                   </div>
+
+               </div>
+
+               <div class = "row">
+
+                   <div class="col s12 m8 offset-m2 l6 offset-l4">
+
+                       <i class="material-icons prefix">face</i>
+                       Пол:
+
+                       <p>
+                           <input class="with-gap" name="gender" type="radio" id="man" value="1" />
+                           <label for="man">M</label>
+                       </p>
+
+                       <p>
+                           <input class="with-gap" name="gender" type="radio" id="woman" value="0" />
+                           <label for="woman">Ж</label>
+                       </p>
+
+                   </div>
+
+               </div>
+               <div class = "row">
+
+                   <div class = "col s12 m8 offset-m2 l9 offset-l2">
+
+                       <i class="material-icons">card_travel</i>
+                       <select name="countries" title="Страна">
+                           <option value="" disabled selected>Выберите страну:</option>
+                           <option value="Азербайджан">Азербайджан</option>
+                           <option value="Армения">Армения</option>
+                           <option value="Беларусь">Беларусь</option>
+                           <option value="Казахстан">Казахстан</option>
+                           <option value="Киргизия">Киргизия</option>
+                           <option value="Молдавия">Молдавия</option>
+                           <option value="Россия">Россия</option>
+                           <option value="Таджикистан">Таджикистан</option>
+                           <option value="Туркменистан">Туркменистан</option>
+                           <option value="Узбекистан">Узбекистан</option>
+                       </select>
+
+                   </div>
+
+               </div>
+
+               <div class = "row">
+
+                   <div class = "col s12 m8 offset-m2 l9 offset-l2">
+
+                       <i class="material-icons prefix">mail</i>
+                       Желаете ли вы получать оповещения от сервиса?
+
+                       <div class="switch">
+                           <label>
+                               Нет
+                               <input name = "mycheckbox" type = "hidden" value="0">
+                               <input type="checkbox" id="mycheckbox" name = "mycheckbox" value="1">
+                               <span class="lever"></span>
+                               Да
+                           </label>
+                       </div>
+
+                   </div>
+
+               </div>
+
+               <div class = "row">
+
+                   <div class = "col s12 m8 offset-m2 l9 offset-l3">
+
+                       <button class="btn waves-effect waves-light" type="submit">Зарегистрироваться
+                           <i class="material-icons right">send</i>
+                       </button>
+
+                   </div>
+
+               </div>
+
+           </form>
+
+       </div>
+
+   </div>
+
+
+   <script src = "<c:url value = "/js/jquery-3.2.1.min.js"/>"></script>
+   <script src = "<c:url value = "/js/materialize.min.js"/>"></script>
+   <script src = "<c:url value = "/js/initial.js"/>"></script>
+
+</body>
+
+</html>
