@@ -4,7 +4,7 @@ import com.romanidze.perpenanto.dao.implementations.ReservationInfoDAOImpl;
 import com.romanidze.perpenanto.dao.interfaces.ReservationInfoDAOInterface;
 import com.romanidze.perpenanto.dto.implementations.ReservationInfoTransferImpl;
 import com.romanidze.perpenanto.dto.interfaces.ReservationInfoTransferInterface;
-import com.romanidze.perpenanto.models.Reservation;
+import com.romanidze.perpenanto.models.ReservationInfo;
 import com.romanidze.perpenanto.models.temp.TempReservationInfo;
 import com.romanidze.perpenanto.services.interfaces.ReservationInfoServiceInterface;
 import com.romanidze.perpenanto.utils.DBConnection;
@@ -92,6 +92,92 @@ public class ReservationInfoServiceImpl implements ReservationInfoServiceInterfa
         }
 
         return sortedList;
+
+    }
+
+    @Override
+    public void addReservationInfo(ReservationInfo reservationInfo) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationInfoDAOInterface reservationInfoDAO = new ReservationInfoDAOImpl(conn);
+            reservationInfoDAO.save(reservationInfo);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void updateReservationInfo(ReservationInfo reservationInfo) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationInfoDAOInterface reservationInfoDAO = new ReservationInfoDAOImpl(conn);
+            reservationInfoDAO.update(reservationInfo);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void deleteReservationInfo(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationInfoDAOInterface reservationInfoDAO = new ReservationInfoDAOImpl(conn);
+            reservationInfoDAO.delete(id);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public List<TempReservationInfo> getReservationInfos() {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        List<TempReservationInfo> resultList = new ArrayList<>();
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationInfoDAOInterface reservationInfoDAO = new ReservationInfoDAOImpl(conn);
+            ReservationInfoTransferInterface reservationInfoDTO = new ReservationInfoTransferImpl();
+
+            resultList.addAll(reservationInfoDTO.getTempReservationInfos(reservationInfoDAO.findAll()));
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return resultList;
 
     }
 }

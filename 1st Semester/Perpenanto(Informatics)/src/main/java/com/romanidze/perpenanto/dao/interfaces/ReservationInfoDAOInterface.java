@@ -7,5 +7,6 @@ import java.util.List;
 public interface ReservationInfoDAOInterface extends CrudDAOInterface<ReservationInfo, Long>{
 
     List<ReservationInfo> findAllByUserId(Long userId);
+    List<ReservationInfo> findAllByReservationId(Long reservationId);
 
 }

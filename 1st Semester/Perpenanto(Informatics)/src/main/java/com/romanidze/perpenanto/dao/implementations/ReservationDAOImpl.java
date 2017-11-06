@@ -3,10 +3,7 @@ package com.romanidze.perpenanto.dao.implementations;
 import com.romanidze.perpenanto.dao.interfaces.ReservationDAOInterface;
 import com.romanidze.perpenanto.models.Reservation;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +17,7 @@ public class ReservationDAOImpl implements ReservationDAOInterface {
     private static final String DELETE_QUERY = "DELETE FROM reservation WHERE reservation.id = ?";
     private static final String UPDATE_QUERY = "UPDATE reservation SET(created_at, status) = (?, ?) " +
                                                 "WHERE reservation.id = ?";
+    private static final String FIND_BY_TIMESTAMP = "SELECT FROM reservation WHERE reservation.created_at = ?";
 
     private ReservationDAOImpl(){}
 
@@ -150,6 +148,38 @@ public class ReservationDAOImpl implements ReservationDAOInterface {
         }catch (SQLException e) {
             e.printStackTrace();
         }
+
+    }
+
+    @Override
+    public Reservation findByTimestamp(Timestamp timestamp) {
+
+        Reservation reservation = null;
+
+        try(PreparedStatement ps = this.conn.prepareStatement(FIND_BY_TIMESTAMP)){
+
+            ps.setTimestamp(1, timestamp);
+
+            try(ResultSet rs = ps.executeQuery()){
+
+                if(rs.next()){
+
+                    reservation = Reservation.builder()
+                                             .id(rs.getLong(1))
+                                             .createdAt(rs.getTimestamp(2))
+                                             .status(rs.getString(3))
+                                             .build();
+
+                }else{
+                    throw new IllegalArgumentException("Reservation not found");
+                }
+            }
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return reservation;
 
     }
 }

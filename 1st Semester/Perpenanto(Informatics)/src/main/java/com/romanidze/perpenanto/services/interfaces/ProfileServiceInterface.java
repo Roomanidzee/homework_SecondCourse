@@ -12,7 +12,11 @@ import java.util.List;
 public interface ProfileServiceInterface {
 
     void addProfile(Profile model);
+    void updateProfile(Profile model);
+    void deleteProfile(Long id);
+    Profile findById(Long id);
     void showProfile(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context);
 
     List<TempProfile> getProfilesByCookie(HttpServletRequest req, HttpServletResponse resp);
+    List<TempProfile> getProfiles();
 }

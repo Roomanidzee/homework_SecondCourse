@@ -1,13 +1,10 @@
 package com.romanidze.perpenanto.services.implementations;
 
-import com.romanidze.perpenanto.dao.implementations.ProfileDAOImpl;
-import com.romanidze.perpenanto.dao.implementations.UserDAOImpl;
-import com.romanidze.perpenanto.dao.interfaces.ProfileDAOInterface;
-import com.romanidze.perpenanto.dao.interfaces.UserDAOInterface;
+import com.romanidze.perpenanto.dao.implementations.*;
+import com.romanidze.perpenanto.dao.interfaces.*;
 import com.romanidze.perpenanto.dto.implementations.ProfileTransferImpl;
 import com.romanidze.perpenanto.dto.interfaces.ProfileTransferInterface;
-import com.romanidze.perpenanto.models.Profile;
-import com.romanidze.perpenanto.models.User;
+import com.romanidze.perpenanto.models.*;
 import com.romanidze.perpenanto.models.temp.TempProfile;
 import com.romanidze.perpenanto.services.interfaces.ProfileServiceInterface;
 import com.romanidze.perpenanto.utils.DBConnection;
@@ -35,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ProfileServiceImpl implements ProfileServiceInterface{
@@ -78,6 +76,76 @@ public class ProfileServiceImpl implements ProfileServiceInterface{
     }
 
     @Override
+    public void updateProfile(Profile model) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProfileDAOInterface profileDAO = new ProfileDAOImpl(conn);
+            profileDAO.update(model);
+
+        }catch(SQLException e){
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+    @Override
+    public void deleteProfile(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProfileDAOInterface profileDAO = new ProfileDAOImpl(conn);
+            profileDAO.delete(id);
+
+        }catch(SQLException e){
+
+            e.printStackTrace();
+
+        }
+
+    }
+
+    @Override
+    public Profile findById(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        Profile profile = null;
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProfileDAOInterface profileDAO = new ProfileDAOImpl(conn);
+            profile = profileDAO.find(id);
+
+        }catch(SQLException e){
+
+            e.printStackTrace();
+
+        }
+
+        return profile;
+
+    }
+
+    @Override
     public void showProfile(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context) {
 
         HttpSession session = req.getSession(true);
@@ -93,6 +161,9 @@ public class ProfileServiceImpl implements ProfileServiceInterface{
 
             UserDAOInterface userDAO = new UserDAOImpl(conn);
             ProfileDAOInterface profileDAO = new ProfileDAOImpl(conn);
+            ProductToUserDAOInterface productToUserDAO = new ProductToUserDAOImpl(conn);
+            ReservationToUserDAOInterface reservationToUserDAO = new ReservationToUserDAOImpl(conn);
+            ReservationInfoDAOInterface reservationInfoDAO = new ReservationInfoDAOImpl(conn);
 
             Long userId;
 
@@ -121,26 +192,102 @@ public class ProfileServiceImpl implements ProfileServiceInterface{
 
             User user = userDAO.find(userId);
             Profile profile = profileDAO.findByUser(user);
+            List<ProductToUser> productsToUser = productToUserDAO.findAllByUser(userId);
+            List<ReservationToUser> reservationsToUser = reservationToUserDAO.findAllByUserId(userId);
+            List<ReservationInfo> reservationInfos1 = reservationInfoDAO.findAllByUserId(userId);
+            List<Product> products = new ArrayList<>();
+            List<Reservation> reservations = new ArrayList<>();
+
+            List<List<ReservationInfo>> reservationInfos2 = products.stream()
+                                                                    .map(product ->
+                                                                            reservationInfoDAO.findAllByReservationId(product.getId()))
+                                                                    .collect(Collectors.toList());
+
+            int soldedProductsCount = reservationInfos2.stream()
+                                                       .mapToInt(reservationInfos ->
+                                                                 reservationInfos.stream()
+                                                                                 .mapToInt(reservationInfo ->
+                                                                                           reservationInfo.getReservationProducts()
+                                                                                                          .size()
+                                                                                 )
+                                                                                 .sum()
+                                                       )
+                                                       .sum();
+
+            reservationsToUser.stream()
+                              .map(ReservationToUser::getUserReservations)
+                              .forEachOrdered(reservations::addAll);
+
+            productsToUser.stream()
+                          .map(ProductToUser::getProducts)
+                          .forEachOrdered(products::addAll);
+
+            int reservationCount = reservations.size();
+            int commonProductsPrice = products.stream()
+                                              .mapToInt(Product::getPrice)
+                                              .sum();
+
+            int spendedMoneyOnReservations = reservationInfos1.stream()
+                                                             .mapToInt(
+                                                                     reservationInfo ->
+                                                                             reservationInfo.getReservationProducts()
+                                                                                            .stream()
+                                                                                            .mapToInt(Product::getPrice)
+                                                                                            .sum()
+                                                             )
+                                                             .sum();
 
             String email = user.getEmailOrUsername();
             String personName = profile.getPersonName();
             String personSurname = profile.getPersonSurname();
-            String country = profile.getAddressToUsers().get(0).getCountry();
-            int postIndex = profile.getAddressToUsers().get(0).getPostalCode();
-            String city = profile.getAddressToUsers().get(0).getCity();
-            String street = profile.getAddressToUsers().get(0).getStreet();
-            int homeNumber = profile.getAddressToUsers().get(0).getHomeNumber();
 
             Map<String, Object> propertyMap = new HashMap<>();
 
+            List<ReservationInfo> fixedReservations = new ArrayList<>();
+
+            IntStream.range(0, reservationInfos1.size() - 1).forEachOrdered(i -> {
+
+                Long id1 = reservationInfos1.get(i).getUserReservation().getId();
+                Long id2 = reservationInfos1.get(i + 1).getUserReservation().getId();
+
+                if (id1.equals(id2)) {
+
+                    reservationInfos1.get(i)
+                                     .getReservationProducts()
+                                     .add(reservationInfos1.get(i + 1).getReservationProducts().get(0));
+
+                    fixedReservations.add(reservationInfos1.get(i));
+                } else {
+                    fixedReservations.add(reservationInfos1.get(i));
+                }
+            });
+
+            Map< ReservationInfo, Integer > reservationsMap = new HashMap<>();
+
+            List<Integer> reservationsPrices = fixedReservations.stream()
+                                                                .map(reservationInfo1 ->
+                                                                        reservationInfo1.getReservationProducts()
+                                                                                        .stream()
+                                                                                        .mapToInt(Product::getPrice)
+                                                                                        .sum())
+                                                                .collect(Collectors.toList());
+
+            IntStream.range(0, reservationsPrices.size()).forEachOrdered(i -> {
+                ReservationInfo reservationInfo = fixedReservations.get(i);
+                Integer reservationPrice = reservationsPrices.get(i);
+                reservationsMap.put(reservationInfo, reservationPrice);
+            });
+
+            propertyMap.put("reservations", reservationsMap);
+            propertyMap.put("products", products);
+            propertyMap.put("reservationCount", reservationCount);
+            propertyMap.put("commonProductsPrice", commonProductsPrice);
+            propertyMap.put("spendedMoneyOnReservations", spendedMoneyOnReservations);
+            propertyMap.put("soldedProductsCount", soldedProductsCount);
             propertyMap.put("email", email);
             propertyMap.put("name", personName);
             propertyMap.put("surname", personSurname);
-            propertyMap.put("country", country);
-            propertyMap.put("postIndex", postIndex);
-            propertyMap.put("city", city);
-            propertyMap.put("street", street);
-            propertyMap.put("homeNumber", homeNumber);
+            propertyMap.put("addresses", profile.getAddressToUsers());
 
             propertyMap.forEach(context::setVariable);
 
@@ -205,5 +352,33 @@ public class ProfileServiceImpl implements ProfileServiceInterface{
         }
 
         return sortedList;
+    }
+
+    @Override
+    public List<TempProfile> getProfiles() {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        List<TempProfile> resultList = new ArrayList<>();
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProfileDAOInterface profileDAO = new ProfileDAOImpl(conn);
+            ProfileTransferInterface profileDTO = new ProfileTransferImpl();
+
+            resultList.addAll(profileDTO.getTempProfiles(profileDAO.findAll()));
+
+        }catch(SQLException e){
+
+            e.printStackTrace();
+
+        }
+
+        return resultList;
+
     }
 }

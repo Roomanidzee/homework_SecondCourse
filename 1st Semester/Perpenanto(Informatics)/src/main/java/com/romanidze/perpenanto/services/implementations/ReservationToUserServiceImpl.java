@@ -4,6 +4,7 @@ import com.romanidze.perpenanto.dao.implementations.ReservationToUserDAOImpl;
 import com.romanidze.perpenanto.dao.interfaces.ReservationToUserDAOInterface;
 import com.romanidze.perpenanto.dto.implementations.ReservationToUserTransferImpl;
 import com.romanidze.perpenanto.dto.interfaces.ReservationToUserTransferInterface;
+import com.romanidze.perpenanto.models.ReservationToUser;
 import com.romanidze.perpenanto.models.temp.TempReservationToUser;
 import com.romanidze.perpenanto.services.interfaces.ReservationToUserServiceInterface;
 import com.romanidze.perpenanto.utils.DBConnection;
@@ -18,7 +19,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -85,6 +91,91 @@ public class ReservationToUserServiceImpl implements ReservationToUserServiceInt
         }
 
         return sortedList;
+
+    }
+
+    @Override
+    public List<TempReservationToUser> getReservationToUser() {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        List<TempReservationToUser> resultList = new ArrayList<>();
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationToUserDAOInterface reservationToUserDAO = new ReservationToUserDAOImpl(conn);
+            ReservationToUserTransferInterface reservationInfoDTO = new ReservationToUserTransferImpl();
+
+            resultList.addAll(reservationInfoDTO.getTempReservationToUsers(reservationToUserDAO.findAll()));
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return resultList;
+    }
+
+    @Override
+    public void addReservationToUser(ReservationToUser reservationToUser) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationToUserDAOInterface reservationToUserDAO = new ReservationToUserDAOImpl(conn);
+            reservationToUserDAO.save(reservationToUser);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void updateReservationToUser(ReservationToUser reservationToUser) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationToUserDAOInterface reservationToUserDAO = new ReservationToUserDAOImpl(conn);
+            reservationToUserDAO.update(reservationToUser);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void deleteReservationToUser(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ReservationToUserDAOInterface reservationToUserDAO = new ReservationToUserDAOImpl(conn);
+            reservationToUserDAO.delete(id);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
 
     }
 }

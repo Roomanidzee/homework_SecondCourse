@@ -90,8 +90,8 @@ public class DBConnection {
         StringBuilder sb = new StringBuilder();
 
         sb.append("jdbc:postgresql://")
-                .append(this.getDB_HOST()).append("/")
-                .append(this.getDB_NAME());
+          .append(this.getDB_HOST()).append("/")
+          .append(this.getDB_NAME());
 
         Map<String, String> resultMap = new LinkedHashMap<>();
 

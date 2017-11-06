@@ -94,4 +94,91 @@ public class ProductToUserServiceImpl implements ProductToUserServiceInterface{
         return sortedList;
 
     }
+
+    @Override
+    public List<TempProductToUser> getProducts() {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        List<TempProductToUser> resultList = new ArrayList<>();
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductToUserDAOInterface productToUserDAO = new ProductToUserDAOImpl(conn);
+            List<ProductToUser> currentProductToUser = productToUserDAO.findAll();
+
+            ProductToUserTransferInterface productToUserDTO = new ProductToUserTransferImpl();
+            resultList.addAll(productToUserDTO.getTempProductToUsers(currentProductToUser));
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return resultList;
+
+    }
+
+    @Override
+    public void addProductToUser(ProductToUser productToUser) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductToUserDAOInterface productToUserDAO = new ProductToUserDAOImpl(conn);
+            productToUserDAO.save(productToUser);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void updateProductToUser(ProductToUser productToUser) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                configMap.get("db_password"))){
+
+            ProductToUserDAOInterface productToUserDAO = new ProductToUserDAOImpl(conn);
+            productToUserDAO.update(productToUser);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void deleteProductToUser(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                configMap.get("db_password"))){
+
+            ProductToUserDAOInterface productToUserDAO = new ProductToUserDAOImpl(conn);
+            productToUserDAO.delete(id);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
 }

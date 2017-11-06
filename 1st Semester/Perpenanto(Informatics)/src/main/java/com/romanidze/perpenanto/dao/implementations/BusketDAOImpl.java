@@ -28,6 +28,8 @@ public class BusketDAOImpl implements BusketDAOInterface {
     private static final String DELETE_QUERY = "DELETE FROM busket WHERE busket.id = ?";
     private static final String UPDATE_QUERY = "UPDATE busket SET(user_id, reservation_product_id) = (?, ?) " +
             "WHERE busket.id = ?";
+    private static final String DELETE_BY_USER_QUERY = "DELETE FROM busket WHERE busket.user_id = ?";
+    private static final String FIND_BY_USER_QUERY = "SELECT * FROM busket WHERE busket.user_id = ?";
     //запросы для оплаты заказа
     private static final String PAY_QUERY1 =
             "INSERT INTO reservation_info(user_id, reservation_id, reservation_product_id) VALUES(?, ?, ?)";
@@ -183,16 +185,25 @@ public class BusketDAOImpl implements BusketDAOInterface {
     @Override
     public void update(Busket model) {
 
-        try (PreparedStatement ps = this.conn.prepareStatement(UPDATE_QUERY)) {
+        if(model.getProducts().size() > 1){
 
-            ps.setLong(1, model.getUserProfile().getId());
-            ps.setLong(2, model.getProducts().get(0).getId());
-            ps.setLong(3, model.getId());
+            deleteByUser(model.getUserProfile().getId());
+            save(model);
 
-            ps.executeUpdate();
+        }else{
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+            try (PreparedStatement ps = this.conn.prepareStatement(UPDATE_QUERY)) {
+
+                ps.setLong(1, model.getUserProfile().getId());
+                ps.setLong(2, model.getProducts().get(0).getId());
+                ps.setLong(3, model.getId());
+
+                ps.executeUpdate();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
         }
 
     }
@@ -243,9 +254,49 @@ public class BusketDAOImpl implements BusketDAOInterface {
             ps.setLong(1, model.getUserProfile().getUserId());
             ps.setLong(2, reservation.getId());
 
+            ps.executeUpdate();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+    }
+
+    @Override
+    public void deleteByUser(Long userId) {
+
+        try(PreparedStatement ps = this.conn.prepareStatement(DELETE_BY_USER_QUERY)){
+
+            ps.setLong(1, userId);
+            ps.executeUpdate();
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public Busket findByUser(Long userId) {
+
+        Busket busket = Busket.builder()
+                              .userProfile(this.profileDAO.find(userId))
+                              .products(Lists.newArrayList())
+                              .build();
+
+
+        try(PreparedStatement ps = this.conn.prepareStatement(FIND_BY_USER_QUERY);
+            ResultSet rs = ps.executeQuery()){
+
+            while(rs.next()){
+                busket.getProducts().add(this.productDAO.find(rs.getLong(3)));
+            }
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return busket;
 
     }
 }

@@ -1,4 +1,4 @@
-CREATE TABLE user(
+CREATE TABLE "user"(
   id SERIAL PRIMARY KEY,
   username_or_email VARCHAR(255),
   password VARCHAR(255)
@@ -10,7 +10,7 @@ CREATE TABLE profile(
   person_surname VARCHAR(100) NOT NULL,
   user_id INTEGER,
   address_id INTEGER,
-  CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+  CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 );
 
 CREATE TABLE product(

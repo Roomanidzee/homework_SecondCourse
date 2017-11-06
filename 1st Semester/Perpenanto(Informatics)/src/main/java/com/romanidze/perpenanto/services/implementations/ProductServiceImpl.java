@@ -1,22 +1,34 @@
 package com.romanidze.perpenanto.services.implementations;
 
+import com.romanidze.perpenanto.dao.implementations.BusketDAOImpl;
 import com.romanidze.perpenanto.dao.implementations.ProductDAOImpl;
+import com.romanidze.perpenanto.dao.interfaces.BusketDAOInterface;
 import com.romanidze.perpenanto.dao.interfaces.ProductDAOInterface;
+import com.romanidze.perpenanto.models.Busket;
 import com.romanidze.perpenanto.models.Product;
 import com.romanidze.perpenanto.services.interfaces.ProductServiceInterface;
 import com.romanidze.perpenanto.utils.DBConnection;
 import com.romanidze.perpenanto.utils.WorkWithCookie;
 import com.romanidze.perpenanto.utils.comparators.CompareAttributes;
 import com.romanidze.perpenanto.utils.comparators.StreamCompareAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -79,5 +91,193 @@ public class ProductServiceImpl implements ProductServiceInterface{
         }
 
         return sortedProducts;
+    }
+
+    @Override
+    public List<Product> getProducts() {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        List<Product> result = null;
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductDAOInterface productDAO = new ProductDAOImpl(conn);
+            result = productDAO.findAll();
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    @Override
+    public void addProduct(Product product) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductDAOInterface productDAO = new ProductDAOImpl(conn);
+            productDAO.save(product);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void updateProduct(Product product) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductDAOInterface productDAO = new ProductDAOImpl(conn);
+            productDAO.update(product);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void deleteProduct(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductDAOInterface productDAO = new ProductDAOImpl(conn);
+            productDAO.delete(id);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public Product findById(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        Product product = null;
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductDAOInterface productDAO = new ProductDAOImpl(conn);
+            product = productDAO.find(id);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return product;
+
+    }
+
+    @Override
+    public void showProductsCatalog(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        List<Product> products = new ArrayList<>();
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            ProductDAOInterface productDAO = new ProductDAOImpl(conn);
+            products.addAll(productDAO.findAll());
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        context.setVariable("products", products);
+
+        try{
+            engine.process("products_catalog.html", context, resp.getWriter());
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void addProductToBusket(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context) {
+
+        HttpSession session = req.getSession(true);
+        Long userId = (Long) session.getAttribute("user_id");
+
+        Long id = Long.valueOf(req.getParameter("product_id"));
+        String title = req.getParameter("product_title");
+        Integer price = Integer.valueOf(req.getParameter("product_price"));
+        String description = req.getParameter("product_description");
+        String photoLink = req.getParameter("product_photoLink");
+
+        Product product = Product.builder()
+                                 .id(id)
+                                 .title(title)
+                                 .price(price)
+                                 .description(description)
+                                 .photoLink(photoLink)
+                                 .build();
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        Busket busket = null;
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            BusketDAOInterface busketDAO = new BusketDAOImpl(conn);
+
+            busket = busketDAO.findByUser(userId);
+            busket.getProducts().add(product);
+            busketDAO.update(busket);
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        context.setVariable("productsCount", busket.getProducts().size());
+
+        try{
+            engine.process("products_catalog.html", context, resp.getWriter());
+            resp.sendRedirect("/catalog");
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
 }

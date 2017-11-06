@@ -78,7 +78,6 @@ public class UserServiceImpl implements UserServiceInterface{
             cookieWork.createRememberCookie(resp, remember);
 
             User user = userDAO.findByUsername(email);
-            String hashedPass = BCrypt.hashpw(password, BCrypt.gensalt());
 
             if(remember){
 
@@ -87,11 +86,11 @@ public class UserServiceImpl implements UserServiceInterface{
 
             }
 
-            if(BCrypt.checkpw(user.getPassword(), hashedPass)){
+            if(BCrypt.checkpw(password, user.getPassword())){
 
                 session.setAttribute("user_id", user.getId());
                 try {
-                    resp.sendRedirect("/profile");
+                    resp.sendRedirect("/user/profile");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -116,6 +115,43 @@ public class UserServiceImpl implements UserServiceInterface{
     }
 
     @Override
+    public void loginAdmin(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            UserDAOInterface userDAO = new UserDAOImpl(conn);
+            HttpSession session = req.getSession(true);
+
+            String username = req.getParameter("username");
+            String password = req.getParameter("password");
+
+            User user = userDAO.findByUsername(username);
+
+            if(password.equals(user.getPassword())){
+
+                session.setAttribute("admin_id", user.getId());
+
+                try{
+                    resp.sendRedirect("/admin");
+                }catch(IOException e){
+                    e.printStackTrace();
+                }
+
+            }
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
     public void registerUser(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context){
 
         ProfileUtils utils = new ProfileUtils();
@@ -123,10 +159,11 @@ public class UserServiceImpl implements UserServiceInterface{
 
         String email = req.getParameter("email");
         String plainPass = req.getParameter("password");
-        String country = req.getParameter("countries");
+        String repeatPass = req.getParameter("repeat_pass");
         String personName = req.getParameter("person_name");
         String personSurname = req.getParameter("person_surname");
-        int postalCode = Integer.valueOf(req.getParameter("post_index"));
+        String country = req.getParameter("countries");
+        int postalCode = Integer.valueOf(req.getParameter("postal_code"));
         String city = req.getParameter("city");
         String street = req.getParameter("street");
         int homeNumber = Integer.valueOf(req.getParameter("home_number"));
@@ -143,13 +180,13 @@ public class UserServiceImpl implements UserServiceInterface{
             AddressToUserDAOInterface addressToUserDAO = new AddressToUserDAOImpl(conn);
 
             boolean checkIfEmpty = !email.isEmpty() && !plainPass.isEmpty()
-                    && !country.isEmpty()
-                    && !personName.isEmpty()
-                    && !personSurname.isEmpty()
-                    && !(postalCode == 0)
-                    && !city.isEmpty()
-                    && !street.isEmpty()
-                    && !(homeNumber == 0);
+                                                    && !country.isEmpty()
+                                                    && !personName.isEmpty()
+                                                    && !personSurname.isEmpty()
+                                                    && !(postalCode == 0)
+                                                    && !city.isEmpty()
+                                                    && !street.isEmpty()
+                                                    && !(homeNumber == 0);
 
             if(!checkIfEmpty){
 
@@ -162,9 +199,9 @@ public class UserServiceImpl implements UserServiceInterface{
                     context.setVariable("message", message1);
 
                     try {
-                        engine.process("login.html", context, resp.getWriter());
+                        engine.process("registration.html", context, resp.getWriter());
 
-                        resp.sendRedirect("/login");
+                        resp.sendRedirect("/register");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -180,9 +217,9 @@ public class UserServiceImpl implements UserServiceInterface{
                     context.setVariable("message", message2);
 
                     try {
-                        engine.process("login.html", context, resp.getWriter());
+                        engine.process("registration.html", context, resp.getWriter());
 
-                        resp.sendRedirect("/login");
+                        resp.sendRedirect("/register");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -190,29 +227,45 @@ public class UserServiceImpl implements UserServiceInterface{
                 }
 
                 User user = User.builder()
-                        .emailOrUsername(email)
-                        .password(BCrypt.hashpw(plainPass, BCrypt.gensalt()))
-                        .build();
+                                .emailOrUsername(email)
+                                .password(BCrypt.hashpw(plainPass, BCrypt.gensalt()))
+                                .build();
+
+                if(!BCrypt.checkpw(repeatPass, user.getPassword())){
+
+                    String message4 = "Пароли не совпадают";
+
+                    context.setVariable("message", message4);
+
+                    try {
+                        engine.process("registration.html", context, resp.getWriter());
+
+                        resp.sendRedirect("/register");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
 
                 userDAO.save(user);
 
                 AddressToUser addressToUser = AddressToUser.builder()
-                        .userId(user.getId())
-                        .country(country)
-                        .postalCode(postalCode)
-                        .city(city)
-                        .street(street)
-                        .homeNumber(homeNumber)
-                        .build();
+                                                           .userId(user.getId())
+                                                           .country(country)
+                                                           .postalCode(postalCode)
+                                                           .city(city)
+                                                           .street(street)
+                                                           .homeNumber(homeNumber)
+                                                           .build();
 
                 addressToUserDAO.save(addressToUser);
 
                 Profile profile = Profile.builder()
-                        .userId(user.getId())
-                        .personName(personName)
-                        .personSurname(personSurname)
-                        .addressToUsers(Lists.newArrayList())
-                        .build();
+                                         .userId(user.getId())
+                                         .personName(personName)
+                                         .personSurname(personSurname)
+                                         .addressToUsers(Lists.newArrayList())
+                                         .build();
 
                 profile.getAddressToUsers().add(addressToUser);
 
@@ -234,7 +287,7 @@ public class UserServiceImpl implements UserServiceInterface{
                 context.setVariable("message", "Заполните все поля");
 
                 try {
-                    engine.process("login.html", context, resp.getWriter());
+                    engine.process("registration.html", context, resp.getWriter());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -246,6 +299,90 @@ public class UserServiceImpl implements UserServiceInterface{
         }
 
 
+
+    }
+
+    @Override
+    public User findById(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        User user = null;
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            UserDAOInterface userDAO = new UserDAOImpl(conn);
+            user = userDAO.find(id);
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return user;
+
+    }
+
+    @Override
+    public void addUser(User user) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                         configMap.get("db_password"))){
+
+            UserDAOInterface userDAO = new UserDAOImpl(conn);
+            userDAO.save(user);
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void updateUser(User user) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            UserDAOInterface userDAO = new UserDAOImpl(conn);
+            userDAO.update(user);
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+
+        DBConnection dbConnection = new DBConnection(this.ctx.getResourceAsStream("/WEB-INF/properties/db.properties"));
+
+        Map<String, String> configMap = new LinkedHashMap<>();
+        configMap.putAll(dbConnection.getDBConfig());
+
+        try(Connection conn = DriverManager.getConnection(configMap.get("db_url"), configMap.get("db_username"),
+                                                          configMap.get("db_password"))){
+
+            UserDAOInterface userDAO = new UserDAOImpl(conn);
+            userDAO.delete(id);
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 

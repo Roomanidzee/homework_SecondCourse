@@ -268,17 +268,17 @@
 
         </div>
 
-        <div class = "row" th:each="user_info : ${user_infos}">
+        <div class = "row" th:each="reservation_to_user : ${reservations_to_users}">
 
             <div class = "col s12 m4 l4">
-                <h6 class = "black-text text-lighten-3 center-align" th:text="${user_info.id}"></h6>
+                <h6 class = "black-text text-lighten-3 center-align" th:text="${reservation_to_user.id}"></h6>
             </div>
 
             <div class = "col s12 m4 l4">
-                <h6 class = "black-text text-lighten-3 center-align" th:text="${user_info.userId}"></h6>
+                <h6 class = "black-text text-lighten-3 center-align" th:text="${reservation_to_user.userId}"></h6>
             </div>
             <div class = "col s12 m4 l4">
-                <h6 class = "black-text text-lighten-3 center-align" th:text="${user_info.userReservationId}"></h6>
+                <h6 class = "black-text text-lighten-3 center-align" th:text="${reservation_to_user.userReservationId}"></h6>
             </div>
 
         </div>

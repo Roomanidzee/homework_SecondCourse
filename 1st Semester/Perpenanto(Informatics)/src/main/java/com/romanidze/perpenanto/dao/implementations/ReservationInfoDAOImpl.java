@@ -33,6 +33,8 @@ public class ReservationInfoDAOImpl implements ReservationInfoDAOInterface{
                     "WHERE reservation_info.id = ?";
     private static final String FIND_BY_USER_QUERY = "SELECT * FROM reservation_info " +
                                                       "WHERE reservation_info.user_id = ?";
+    private static final String FIND_BY_RESERVATION_QUERY = "SELECT * FROM reservation_info " +
+                                                         "WHERE reservation_info.reservation_id = ?";
 
     private ReservationInfoDAOImpl(){}
 
@@ -241,5 +243,40 @@ public class ReservationInfoDAOImpl implements ReservationInfoDAOInterface{
 
         return resultList;
 
+    }
+
+    @Override
+    public List<ReservationInfo> findAllByReservationId(Long reservationId) {
+        List<ReservationInfo> resultList = new ArrayList<>();
+
+        try(PreparedStatement ps = this.conn.prepareStatement(FIND_BY_RESERVATION_QUERY)){
+
+            ps.setLong(1, reservationId);
+
+            try(ResultSet rs = ps.executeQuery()){
+
+                while(rs.next()){
+
+                    ReservationInfo reservationInfo = ReservationInfo.builder()
+                                                                     .id(rs.getLong(1))
+                                                                     .userProfile(this.profileDAO.find(rs.getLong(2)))
+                                                                     .userReservation(this.reservationDAO.find(
+                                                                             rs.getLong(3))
+                                                                     )
+                                                                     .reservationProducts(Lists.newArrayList())
+                                                                     .build();
+                    reservationInfo.getReservationProducts().add(this.productDAO.find(rs.getLong(4)));
+                    resultList.add(reservationInfo);
+
+
+                }
+
+            }
+
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return resultList;
     }
 }

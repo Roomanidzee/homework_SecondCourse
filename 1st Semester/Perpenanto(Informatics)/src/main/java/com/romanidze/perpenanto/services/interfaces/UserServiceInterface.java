@@ -11,7 +11,13 @@ import java.util.List;
 public interface UserServiceInterface {
 
     void loginUser(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context);
+    void loginAdmin(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context);
     void registerUser(HttpServletRequest req, HttpServletResponse resp, TemplateEngine engine, WebContext context);
+    User findById(Long id);
+
+    void addUser(User user);
+    void updateUser(User user);
+    void deleteUser(Long id);
 
     List<User> getUsers();
     List<User> getUsersByCookie(HttpServletRequest req, HttpServletResponse resp);
