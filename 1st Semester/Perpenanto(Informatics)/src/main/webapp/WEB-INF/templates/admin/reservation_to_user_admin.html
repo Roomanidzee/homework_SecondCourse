@@ -15,25 +15,7 @@
 
 <body>
 
-    <nav class = "nav-color">
-
-        <div class = "nav-wrapper">
-
-            <a href = "#" class = "brand-logo left">*лого*</a>
-
-            <ul id = "nav-mobile" class = "right hide-on-med-and-down">
-
-                <li><a th:href="@{/admin/security}">Логины и пароли пользователей</a></li>
-                <li><a th:href = "@{/admin/profiles}">Профили пользователей</a></li>
-                <li><a th:href = "@{/admin/reservations}">Заказы пользователей</a></li>
-                <li><a th:href = "@{/admin/products}">Товары сервиса</a></li>
-                <li><a th:href = "@{/admin/reservations_infos}">Информация о заказах</a></li>
-
-            </ul>
-
-        </div>
-
-    </nav>
+    <div th:replace="fragments/header-admin :: adminservice-header"></div>
 
     <div class = "row">
 
@@ -45,7 +27,7 @@
 
             <div id = "modal1" class = "modal">
 
-                <form class = "col s12" th:action="@{/admin/user_infos}" method="POST">
+                <form class = "col s12" th:action="@{/admin/reservations_to_user}" method="POST">
 
                 <div class = "modal-content">
 
@@ -107,7 +89,7 @@
 
             <div id = "modal2" class = "modal">
 
-                <form class = "col s12" th:action="@{/admin/user_infos}" method="POST" >
+                <form class = "col s12" th:action="@{/admin/reservations_to_user}" method="POST" >
 
                 <div class = "modal-content">
 
@@ -181,7 +163,7 @@
 
             <div id = "modal3" class = "modal">
 
-                <form class = "col s12" th:action="@{/admin/user_infos}" method="POST">
+                <form class = "col s12" th:action="@{/admin/reservations_to_user}" method="POST">
 
                 <div class = "modal-content">
 

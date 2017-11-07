@@ -13,22 +13,26 @@
 
 <body>
 
-<nav class = "nav-color">
+<div th:replace="fragments/header :: service-header">
 
-    <div class = "nav-wrapper">
+    <nav class = "nav-color">
 
-        <a href = "#" class = "brand-logo left">*здесь должен быть логотип*</a>
+        <div class = "nav-wrapper">
 
-        <ul id = "nav-mobile" class = "right hide-on-med-and-down">
+            <a href = "#" class = "brand-logo left">*здесь должен быть логотип*</a>
 
-            <li><a th:href = "@{/index}">Главная страница</a></li>
-            <li><a href = "#">Каталог товаров</a></li>
+            <ul id = "nav-mobile" class = "right hide-on-med-and-down">
 
-        </ul>
+                <li><a th:href = "@{/index}">Главная страница</a></li>
+                <li><a href = "#">Каталог товаров</a></li>
 
-    </div>
+            </ul>
 
-</nav>
+        </div>
+
+    </nav>
+
+</div>
 
 <div class = "forms">
 
@@ -39,7 +43,7 @@
 
     <div class = "row">
 
-        <form class = "col s12 m8 offset-m2 l6 offset-l3" th:action="@{/profile}" method="POST">
+        <form class = "col s12 m8 offset-m2 l6 offset-l3" th:action="@{/user/profile}" method="POST">
 
             <div class="row">
 
