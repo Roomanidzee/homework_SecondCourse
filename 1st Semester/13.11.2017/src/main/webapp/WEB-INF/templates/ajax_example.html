@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+    <title>Пример с AJAX</title>
+
+</head>
+<body>
+
+    <h3>Пример работы с AJAX</h3>
+    Выберите страну производства:
+
+    <select id = "countries">
+
+        <option>Выберите страну: </option>
+        <option value = "Россия">Россия</option>
+        <option value = "Германия">Германия</option>
+
+    </select>
+
+    <br/>
+    <br/>
+
+    Выберите машину:
+    <select id = "car">
+
+        <option>Выберите машину: </option>
+
+    </select>
+
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/js/ajax_launch.js}"></script>
+</body>
+</html>
