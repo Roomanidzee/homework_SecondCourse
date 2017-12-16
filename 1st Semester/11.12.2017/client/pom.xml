@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.romanidze.weatherapp</groupId>
+        <artifactId>weatherapp</artifactId>
+        <version>2.0</version>
+    </parent>
+
+
+    <groupId>com.romanidze.weatherapp</groupId>
+    <artifactId>client</artifactId>
+    <version>2.0</version>
+
+    <properties>
+        <kryonet.version>2.22.0-RC1</kryonet.version>
+        <weatherapp.version>2.0</weatherapp.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.romanidze.weatherapp</groupId>
+            <artifactId>weatherinfo</artifactId>
+            <version>${weatherapp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.romanidze.weatherapp</groupId>
+            <artifactId>network</artifactId>
+            <version>${weatherapp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryonet</artifactId>
+            <version>${kryonet.version}</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
