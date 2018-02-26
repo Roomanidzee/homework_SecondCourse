@@ -1,0 +1,31 @@
+doctype html
+
+html
+    head
+        title Простой калькулятор
+        link(rel='stylesheet', href='/css/form_style.css')
+    body
+        form(action="/calc", method="POST")
+
+            label(for = "first_number") Первое число
+            input(type = "text", id = "first_number", name = "firstNumber", placeholder="Введите число: ")
+
+            label(for = "second_number") Второе число
+            input(type = "text", id = "second_number", name = "secondNumber", placeholder="Введите число: ")
+
+            label(for = "math_action") Действие
+            select(id = "math_action", name = "mathAction")
+              option(value = "plus") Сложение
+              option(value = "minus") Вычитание
+              option(value = "multiply") Умножение
+              option(value = "divide") Деление
+
+            if result > 0
+              input(type = "text", placeholder = "Результат: " + result)
+
+            else
+              input(type = "text", placeholder = "Результат: 0")
+
+            button(type="submit") Вычислить
+
+
