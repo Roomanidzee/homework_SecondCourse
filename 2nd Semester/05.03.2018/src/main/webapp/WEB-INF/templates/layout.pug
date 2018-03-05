@@ -1,0 +1,14 @@
+doctype html
+html
+    head
+        title Простенький сайт - #{title}
+        block stylesheets
+            link(rel = stylesheet, href = '/css/nav_style.css')
+    body
+        ul
+            li: a(href = '/calc') Калькулятор
+            li: a(href = '/simple') Простенькое отображение
+            li: a(href = '/complex') Сложное отображение
+
+        block content
+            p Здравствуй, пользователь! Твоему внимани представлен простенький сайт
