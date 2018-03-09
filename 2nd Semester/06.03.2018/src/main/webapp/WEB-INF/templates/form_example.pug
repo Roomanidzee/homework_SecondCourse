@@ -1,0 +1,37 @@
+extends layout
+
+block stylesheets
+    link(rel = 'stylesheet', href = '/css/form_style.css')
+    link(rel = 'stylesheet', href = '/css/nav_style.css')
+
+block content
+
+    form(action = '/form_example', method = 'POST')
+
+        label(for = "country") Страна отправления
+        input(type = "text", id = "country", name = "country", placeholder = "Куда едем ? ")
+        if errors.country
+            p.error errors.country
+
+        label(for = "departureDate") Дата отправления
+        input(type = "text", id = "departureDate", name = "departureDate", placeholder = "Когда отправляемся ?")
+        if errors.departureDate
+            p.error errors.departureDate
+
+        label(for = "arrivalDate") Дата прибытия
+        input(type = "text", id = "arrivalDate", name = "arrivalDate", placeholder = "Когда приедем ?")
+        if errors.arrivalDate
+                p.error errors.arrivalDate
+
+        button(type="submit") Отправить данные
+
+    if requests
+        div.div-table
+            div(class = 'div-table-col', align = 'center') Страна
+            div(class = 'div-table-col', align = 'center') Дата отправления
+            div(class = 'div-table-col', align = 'center') Дата прибытия
+
+            each request in requests
+                div(class = 'div-table-col', align = 'center')=request.country
+                div(class = 'div-table-col', align = 'center')=request.departureDate
+                div(class = 'div-table-col', align = 'center')=request.arrivalDate

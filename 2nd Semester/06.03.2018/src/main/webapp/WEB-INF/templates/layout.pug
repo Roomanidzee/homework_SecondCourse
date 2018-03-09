@@ -1,0 +1,12 @@
+doctype html
+html
+    head
+        title Простенький сайт - #{title}
+        block stylesheets
+            link(rel = stylesheet, href = '/css/nav_style.css')
+    body
+        ul
+            li: a(href = '/form_example') Пример работы с формой
+            li: a(href = '/smiles') Смайлики
+
+        block content

@@ -1,0 +1,17 @@
+extends layout
+
+block stylesheets
+    link(rel = 'stylesheet', href = '/css/form_style.css')
+    link(rel = 'stylesheet', href = '/css/nav_style.css')
+
+block content
+
+    form(action = '/smiles', method = 'POST')
+
+        label(for = "smile_input") Введите тип эмоджи(например, :cat:)
+        input(type = "text", id = "smile_input", name = "smile_type", placeholder = "Что нужно ?")
+
+        button(type = "submit") Показать смайл
+
+    if smileHelper
+        p= smileHelper.getEmojiView(smile)
