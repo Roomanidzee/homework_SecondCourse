@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text=" #{travel.title} "></title>
+    <link rel = "stylesheet" th:href="@{/css/nav_style.css}"/>
+    <link rel = "stylesheet" th:href="@{/css/form_style.css}"/>
+</head>
+
+<body>
+
+    <ul>
+
+        <li>
+            <a href = "#" th:text=" #{travel.menu} "></a>
+        </li>
+        <li>
+            <a th:href = "@{/form_example(lang=ru)}" th:text=" #{travel.ru} "></a>
+        </li>
+        <li>
+            <a th:href = "@{/form_example(lang=iw)}" th:text=" #{travel.iw} "></a>
+        </li>
+        <li>
+            <a th:href = "@{/form_example(lang=de)}" th:text=" #{travel.de} "></a>
+        </li>
+
+    </ul>
+
+    <form th:action="@{/form_example}" method="POST" th:object="${tripRequestForm}">
+
+        <label for = "country" th:text=" #{travel.country} "></label>
+        <input type = "text" id = "country" th:field="*{country}" th:placeholder=" #{travel.country_placeholder} "/>
+        <p class = "error" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></p>
+
+        <label for = "departureDate" th:text=" #{travel.departure_date} "></label>
+        <input type = "text" id = "departureDate" th:field="*{departureDate}" th:placeholder=" #{travel.departure_date_placeholder} "/>
+        <p class = "error" th:if="${#fields.hasErrors('departureDate')}" th:errors="*{departureDate}"></p>
+
+        <label for = "arrivalDate" th:text=" #{travel.arrival_date} "></label>
+        <input type = "text" id = "arrivalDate" th:field="*{arrivalDate}" th:placeholder=" #{travel.arrival_date_placeholder} "/>
+        <p class = "error" th:if="${#fields.hasErrors('arrivalDate')}" th:errors="*{arrivalDate}"></p>
+
+        <button type="submit" th:text=" #{travel.submit_button} "></button>
+
+    </form>
+
+</body>
+
+</html>
