@@ -1,0 +1,8 @@
+vk:
+  application:
+     client_id: *id клиента*
+     client_secret: *секретный ключ клиента*
+     oauth_url: |-
+                https://oauth.vk.com/authorize?client_id={0}&display=page&redirect_uri=
+                                                        http://localhost:8080/user_page&scope=groups&response_type=code
+     redirect_uri: http://localhost:8080/user_page
